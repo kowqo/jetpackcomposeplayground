@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.genshinapp.api.RestaurantsApiService
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -20,6 +21,10 @@ class RestaurantsViewModel(private val stateHandle: SavedStateHandle) : ViewMode
     private val restInterface: RestaurantsApiService
     var state by mutableStateOf(emptyList<Restaurant>())
 
+    private val errorHandler = CoroutineExceptionHandler { _, exception ->
+
+        exception.printStackTrace()
+    }
 
 
     init {
@@ -42,12 +47,18 @@ class RestaurantsViewModel(private val stateHandle: SavedStateHandle) : ViewMode
     }
 
     private fun getRestaurants() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val restaurants = restInterface.getRestaurants()
-            withContext(Dispatchers.Main) {
-                state = restaurants.restoreSelections()
-            }
+        viewModelScope.launch(errorHandler) {
+            val restaurants = getRemoteRestaurants()
+            //show rest
+            state = restaurants.restoreSelections()
         }
+    }
+
+    suspend fun getRemoteRestaurants(): List<Restaurant> {
+        return withContext(Dispatchers.IO) {
+            restInterface.getRestaurants()
+        }
+
     }
 
 

@@ -73,9 +73,15 @@ fun RestaurantItem(restaurant: Restaurant, onClick: (id: Int) -> Unit) {
 }
 
 @Composable
-fun RestaurantDetails(modifier: Modifier = Modifier, title: String = "", description: String = "") {
+fun RestaurantDetails(
+    modifier: Modifier = Modifier,
+    title: String = "",
+    description: String = "",
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start
+) {
 
-    Column(modifier = modifier) {
+    Column(modifier = modifier,
+        horizontalAlignment = horizontalAlignment) {
         Text(
             text = title,
             style = MaterialTheme.typography.headlineSmall
