@@ -64,4 +64,11 @@ dependencies {
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
+
+    //web для запросов из приложения
+    implementation "com.squareup.retrofit2:retrofit:2.9.0"
+    //аннотации для веб сервера
+    implementation "com.google.code.gson:gson:2.9.0"
+    //конвертер json->kotlin class
+    implementation "com.squareup.retrofit2:converter-gson:2.9.0"
 }
