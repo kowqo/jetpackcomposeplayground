@@ -29,14 +29,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 
 @Composable
-fun RestaurantsScreen() {
+fun RestaurantsScreen(onItemClick: (id: Int) -> Unit={}) {
     val viewModel: RestaurantsViewModel = viewModel()
 
     LazyColumn(contentPadding = PaddingValues(8.dp)) {
         items(viewModel.state) { restaurant ->
             RestaurantItem(
                 restaurant = restaurant,
-                onClick = { viewModel.toggleFavorite(restaurant.id) }
+                onFavoriteClick = { id-> viewModel.toggleFavorite(id) },
+                onItemClick = { id->onItemClick(id) }
             )
         }
     }
@@ -44,11 +45,17 @@ fun RestaurantsScreen() {
 }
 
 @Composable
-fun RestaurantItem(restaurant: Restaurant, onClick: (id: Int) -> Unit) {
+fun RestaurantItem(
+    restaurant: Restaurant,
+    onFavoriteClick: (id: Int) -> Unit,
+    onItemClick: (id: Int) -> Unit
+) {
     val icon = if (restaurant.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder
     Card(
         elevation = CardDefaults.cardElevation(4.dp),
-        modifier = Modifier.padding(8.dp)
+        modifier = Modifier
+            .padding(8.dp)
+            .clickable { onItemClick(restaurant.id) }
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -66,7 +73,7 @@ fun RestaurantItem(restaurant: Restaurant, onClick: (id: Int) -> Unit) {
             RestaurantIcon(
                 modifier = Modifier.weight(0.15f),
                 icon = icon,
-                onClick = { onClick(restaurant.id) }
+                onClick = { onFavoriteClick(restaurant.id) }
             )
         }
     }
@@ -80,8 +87,10 @@ fun RestaurantDetails(
     horizontalAlignment: Alignment.Horizontal = Alignment.Start
 ) {
 
-    Column(modifier = modifier,
-        horizontalAlignment = horizontalAlignment) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = horizontalAlignment
+    ) {
         Text(
             text = title,
             style = MaterialTheme.typography.headlineSmall
