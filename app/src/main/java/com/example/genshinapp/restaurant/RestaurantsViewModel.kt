@@ -1,12 +1,14 @@
 package com.example.genshinapp.restaurant
 
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.SavedStateHandle
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.genshinapp.api.RestaurantsApiService
+import java.lang.Exception
+import java.net.ConnectException
+import java.net.UnknownHostException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -14,57 +16,55 @@ import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import java.lang.Exception
-import java.net.ConnectException
-import java.net.UnknownHostException
 
-class RestaurantsViewModel(private val stateHandle: SavedStateHandle) : ViewModel() {
+class RestaurantsViewModel() : ViewModel() {
 
     private val restInterface: RestaurantsApiService
     private val restaurantsDao = RestaurantsDb.getDaoInstance(
-        RestaurantsApplication.getAppContext(),
+        RestaurantsApplication.getAppContext()
     )
+
     var state by mutableStateOf(emptyList<Restaurant>())
 
     private val errorHandler = CoroutineExceptionHandler { _, exception ->
-
         exception.printStackTrace()
     }
 
-
     init {
         val retrofit: Retrofit = Retrofit.Builder()
-            //добавить конвертор
+            // добавить конвертор
             .addConverterFactory(
                 GsonConverterFactory.create()
             )
-            //урл базы
+            // урл базы
             .baseUrl(
                 "https://restaurantcompose-96296-default-rtdb.europe-west1.firebasedatabase.app/"
             )
             .build()
-        //затолкать в экземляр реализацию ретрофита
+        // затолкать в экземляр реализацию ретрофита
         restInterface = retrofit.create(
             RestaurantsApiService::class.java
         )
-
         getRestaurants()
+    }
+
+    fun toggleFavorite(id: Int, oldValue: Boolean) {
+        viewModelScope.launch {
+            val updatedRestaurants = toggleFavoriteRestaurant(id, oldValue)
+            state = updatedRestaurants
+        }
     }
 
     private fun getRestaurants() {
         viewModelScope.launch(errorHandler) {
-            val restaurants = getAllRestaurants()
-            //show rest
-            state = restaurants.restoreSelections()
+            state = getAllRestaurants()
         }
     }
 
     private suspend fun getAllRestaurants(): List<Restaurant> {
         return withContext(Dispatchers.IO) {
             try {
-                val restaurants = restInterface.getRestaurants()
-                restaurantsDao.addAll(restaurants)
-                return@withContext restaurants
+                refreshCache()
             } catch (
                 e: Exception
             ) {
@@ -72,49 +72,31 @@ class RestaurantsViewModel(private val stateHandle: SavedStateHandle) : ViewMode
                     is UnknownHostException,
                     is ConnectException,
                     is HttpException -> {
-                        return@withContext restaurantsDao.getAll()
+                        if (restaurantsDao.getAll().isEmpty()) {
+                            throw Exception("Something went wrong" + "we have no data to display")
+                        }
                     }
-
                     else -> throw e
                 }
             }
+            return@withContext restaurantsDao.getAll()
         }
-
     }
 
-
-    fun toggleFavorite(id: Int): Unit {
-        val restaurants = state.toMutableList()
-        val itemIndex = restaurants.indexOfFirst { it.id == id }
-        val item = restaurants[itemIndex]
-        restaurants[itemIndex] = item.copy(isFavorite = !item.isFavorite)
-        storeSelection(restaurants[itemIndex])
-        state = restaurants
-    }
-
-    private fun List<Restaurant>.restoreSelections(): List<Restaurant> {
-        stateHandle.get<List<Int>?>(FAVORITES)?.let { selectedIds ->
-            val restaurantsMap = this.associateBy { it.id }
-            selectedIds.forEach { id ->
-                restaurantsMap[id]?.isFavorite = true
+    private suspend fun refreshCache() {
+        val remoteRestaurants = restInterface.getRestaurants()
+        val favoritedRestaurants = restaurantsDao.getAllFavorited()
+        restaurantsDao.addAll(remoteRestaurants)
+        restaurantsDao.updateAll(
+            favoritedRestaurants.map {
+                PartialRestaurant(it.id, true)
             }
+        )
+    }
 
-            return restaurantsMap.values.toList()
+    private suspend fun toggleFavoriteRestaurant(id: Int, oldValue: Boolean) =
+        withContext(Dispatchers.IO) {
+            restaurantsDao.update(PartialRestaurant(id = id, isFavorite = !oldValue))
+            restaurantsDao.getAll()
         }
-        return this
-    }
-
-    private fun storeSelection(item: Restaurant) {
-        val savedToggled = stateHandle
-            .get<List<Int>?>(FAVORITES)
-            .orEmpty().toMutableList()
-        if (item.isFavorite) savedToggled.add(item.id)
-        else savedToggled.remove(item.id)
-        stateHandle[FAVORITES] = savedToggled
-    }
-
-
-    companion object {
-        const val FAVORITES = "favorites"
-    }
 }

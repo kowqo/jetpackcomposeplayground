@@ -5,12 +5,12 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-
 @Database(
-    entities = [Restaurant::class], version = 1, exportSchema = false
+    entities = [Restaurant::class],
+    version = 2,
+    exportSchema = false
 )
-abstract class RestaurantsDb : RoomDatabase(
-) {
+abstract class RestaurantsDb : RoomDatabase() {
     abstract val dao: RestaurantsDao
 
     companion object {
@@ -29,7 +29,9 @@ abstract class RestaurantsDb : RoomDatabase(
         }
 
         private fun buildDatabase(context: Context): RestaurantsDb = Room.databaseBuilder(
-            context.applicationContext, RestaurantsDb::class.java, "restaurants_database"
+            context.applicationContext,
+            RestaurantsDb::class.java,
+            "restaurants_database"
         ).fallbackToDestructiveMigration().build()
     }
 }
