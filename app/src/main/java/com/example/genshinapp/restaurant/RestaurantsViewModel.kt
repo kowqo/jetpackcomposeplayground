@@ -8,17 +8,22 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.genshinapp.api.RestaurantsApiService
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.HttpException
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.lang.Exception
+import java.net.ConnectException
+import java.net.UnknownHostException
 
 class RestaurantsViewModel(private val stateHandle: SavedStateHandle) : ViewModel() {
 
     private val restInterface: RestaurantsApiService
+    private val restaurantsDao = RestaurantsDb.getDaoInstance(
+        RestaurantsApplication.getAppContext(),
+    )
     var state by mutableStateOf(emptyList<Restaurant>())
 
     private val errorHandler = CoroutineExceptionHandler { _, exception ->
@@ -48,15 +53,31 @@ class RestaurantsViewModel(private val stateHandle: SavedStateHandle) : ViewMode
 
     private fun getRestaurants() {
         viewModelScope.launch(errorHandler) {
-            val restaurants = getRemoteRestaurants()
+            val restaurants = getAllRestaurants()
             //show rest
             state = restaurants.restoreSelections()
         }
     }
 
-    suspend fun getRemoteRestaurants(): List<Restaurant> {
+    private suspend fun getAllRestaurants(): List<Restaurant> {
         return withContext(Dispatchers.IO) {
-            restInterface.getRestaurants()
+            try {
+                val restaurants = restInterface.getRestaurants()
+                restaurantsDao.addAll(restaurants)
+                return@withContext restaurants
+            } catch (
+                e: Exception
+            ) {
+                when (e) {
+                    is UnknownHostException,
+                    is ConnectException,
+                    is HttpException -> {
+                        return@withContext restaurantsDao.getAll()
+                    }
+
+                    else -> throw e
+                }
+            }
         }
 
     }

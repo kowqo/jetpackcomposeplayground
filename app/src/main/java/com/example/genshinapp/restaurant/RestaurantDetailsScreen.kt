@@ -17,27 +17,26 @@ fun RestaurantDetailsScreen() {
     val viewModel: RestaurantViewModel = viewModel()
     val item = viewModel.state
     if (item != null) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp)
-            ) {
-                RestaurantIcon(
-                    icon = Icons.Filled.Place,
-                    Modifier.padding(
-                        top =32.dp,
-                        bottom = 32.dp
-                    )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            RestaurantIcon(
+                icon = Icons.Filled.Place,
+                Modifier.padding(
+                    top = 32.dp,
+                    bottom = 32.dp
                 )
-                RestaurantDetails(
-                    modifier =  Modifier.padding(bottom = 32.dp),
-                    title = item.title,
-                    description = item.description,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                )
-                Text( text = "More text coming soon")
-            }
-
+            )
+            RestaurantDetails(
+                modifier = Modifier.padding(bottom = 32.dp),
+                title = item.title,
+                description = item.description,
+                horizontalAlignment = Alignment.CenterHorizontally
+            )
+            Text(text = "More text coming soon")
+        }
     }
 }

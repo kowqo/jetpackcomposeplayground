@@ -27,21 +27,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 
-
 @Composable
-fun RestaurantsScreen(onItemClick: (id: Int) -> Unit={}) {
+fun RestaurantsScreen(onItemClick: (id: Int) -> Unit = {}) {
     val viewModel: RestaurantsViewModel = viewModel()
 
     LazyColumn(contentPadding = PaddingValues(8.dp)) {
         items(viewModel.state) { restaurant ->
             RestaurantItem(
                 restaurant = restaurant,
-                onFavoriteClick = { id-> viewModel.toggleFavorite(id) },
-                onItemClick = { id->onItemClick(id) }
+                onFavoriteClick = { id -> viewModel.toggleFavorite(id) },
+                onItemClick = { id -> onItemClick(id) }
             )
         }
     }
-
 }
 
 @Composable
@@ -63,7 +61,7 @@ fun RestaurantItem(
         ) {
             RestaurantIcon(
                 icon = Icons.Default.Place,
-                modifier = Modifier.weight(0.15f),
+                modifier = Modifier.weight(0.15f)
             )
             RestaurantDetails(
                 title = restaurant.title,
@@ -86,7 +84,6 @@ fun RestaurantDetails(
     description: String = "",
     horizontalAlignment: Alignment.Horizontal = Alignment.Start
 ) {
-
     Column(
         modifier = modifier,
         horizontalAlignment = horizontalAlignment
@@ -100,7 +97,6 @@ fun RestaurantDetails(
                 text = description,
                 style = MaterialTheme.typography.bodyMedium
             )
-
         }
     }
 }
