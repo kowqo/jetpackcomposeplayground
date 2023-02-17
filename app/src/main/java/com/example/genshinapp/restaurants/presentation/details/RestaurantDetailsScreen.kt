@@ -10,15 +10,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.genshinapp.restaurants.domain.Restaurant
 import com.example.genshinapp.restaurants.presentation.list.RestaurantDetails
 import com.example.genshinapp.restaurants.presentation.list.RestaurantIcon
 
 @Composable
-fun RestaurantDetailsScreen() {
-    val viewModel: RestaurantViewModel = viewModel()
-    val item = viewModel.state
-    if (item != null) {
+fun RestaurantDetailsScreen(state: Restaurant) {
+    if (state != null) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -34,8 +32,8 @@ fun RestaurantDetailsScreen() {
             )
             RestaurantDetails(
                 modifier = Modifier.padding(bottom = 32.dp),
-                title = item.title,
-                description = item.description,
+                title = state.title,
+                description = state.description,
                 horizontalAlignment = Alignment.CenterHorizontally
             )
             Text(text = "More text coming soon")

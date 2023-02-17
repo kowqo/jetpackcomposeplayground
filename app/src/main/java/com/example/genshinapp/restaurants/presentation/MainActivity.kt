@@ -12,6 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.example.genshinapp.restaurants.presentation.details.RestaurantDetailsScreen
+import com.example.genshinapp.restaurants.presentation.details.RestaurantViewModel
 import com.example.genshinapp.restaurants.presentation.list.RestaurantsScreen
 import com.example.genshinapp.restaurants.presentation.list.RestaurantsViewModel
 import com.example.genshinapp.ui.theme.GenshinappTheme
@@ -53,9 +54,11 @@ private fun RestaurantApp() {
                     type = NavType.StringType
                 }
             )
-        ) { navStackEntry ->
+        ) {
+                navStackEntry ->
+            val viewModel: RestaurantViewModel = viewModel()
 
-            RestaurantDetailsScreen()
+            viewModel.state?.let { RestaurantDetailsScreen(it) }
         }
     }
 }
