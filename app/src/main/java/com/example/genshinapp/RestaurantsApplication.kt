@@ -1,4 +1,4 @@
-package com.example.genshinapp.restaurant
+package com.example.genshinapp
 
 import android.app.Application
 import android.content.Context

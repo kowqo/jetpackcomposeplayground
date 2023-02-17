@@ -1,10 +1,12 @@
-package com.example.genshinapp.restaurant
+package com.example.genshinapp.restaurants.presentation.list
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.genshinapp.restaurants.domain.GetInitialRestaurantsUseCase
+import com.example.genshinapp.restaurants.domain.ToggleRestaurantUseCase
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 

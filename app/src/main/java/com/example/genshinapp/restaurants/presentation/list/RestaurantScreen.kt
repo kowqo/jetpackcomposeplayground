@@ -1,4 +1,4 @@
-package com.example.genshinapp.restaurant
+package com.example.genshinapp.restaurants.presentation.list
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -18,20 +18,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.genshinapp.restaurants.domain.Restaurant
 
 @Composable
-fun RestaurantsScreen(onItemClick: (id: Int) -> Unit = {}) {
-    val viewModel: RestaurantsViewModel = viewModel()
-    val state = viewModel.state
-
+fun RestaurantsScreen(
+    state: RestaurantsScreenState,
+    onItemClick: (id: Int) -> Unit = {},
+    onFavoriteClick: (id: Int, oldValue: Boolean) -> Unit
+) {
     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
         LazyColumn(contentPadding = PaddingValues(8.dp)) {
             items(state.restaurants) { restaurant ->
                 RestaurantItem(
                     restaurant = restaurant,
                     onFavoriteClick = { id, oldValue ->
-                        viewModel.toggleFavorite(id, oldValue)
+                        onFavoriteClick(id, oldValue)
                     },
                     onItemClick = { id -> onItemClick(id) }
                 )
@@ -123,5 +124,9 @@ fun RestaurantIcon(
 @Preview(showBackground = true)
 @Composable
 fun Preview() {
-    RestaurantsScreen()
+    RestaurantsScreen(
+        RestaurantsScreenState(listOf(), true),
+        {},
+        { _, _ -> }
+    )
 }

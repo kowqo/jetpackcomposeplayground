@@ -1,6 +1,11 @@
-package com.example.genshinapp.restaurant
+package com.example.genshinapp.restaurants.data
 
-import com.example.genshinapp.api.RestaurantsApiService
+import com.example.genshinapp.RestaurantsApplication
+import com.example.genshinapp.restaurants.data.local.LocalRestaurant
+import com.example.genshinapp.restaurants.data.local.PartialLocalRestaurant
+import com.example.genshinapp.restaurants.data.local.RestaurantsDb
+import com.example.genshinapp.restaurants.data.remote.RestaurantsApiService
+import com.example.genshinapp.restaurants.domain.Restaurant
 import java.lang.Exception
 import java.net.ConnectException
 import java.net.UnknownHostException
@@ -25,17 +30,23 @@ class RestaurantsRepository {
 
     suspend fun getRestaurants(): List<Restaurant> {
         return withContext(Dispatchers.IO) {
-            return@withContext restaurantsDao.getAll()
+            return@withContext restaurantsDao.getAll().map {
+                Restaurant(it.id, it.title, it.description, it.isFavorite)
+            }
         }
     }
 
     private suspend fun refreshCache() {
         val remoteRestaurants = restInterface.getRestaurants()
         val favoritedRestaurants = restaurantsDao.getAllFavorited()
-        restaurantsDao.addAll(remoteRestaurants)
+        restaurantsDao.addAll(
+            remoteRestaurants.map {
+                LocalRestaurant(it.id, it.title, it.description, false)
+            }
+        )
         restaurantsDao.updateAll(
             favoritedRestaurants.map {
-                PartialRestaurant(it.id, true)
+                PartialLocalRestaurant(it.id, true)
             }
         )
     }
@@ -55,6 +66,7 @@ class RestaurantsRepository {
                             throw Exception("Something went wrong" + "we have no data to display")
                         }
                     }
+
                     else -> throw e
                 }
             }
@@ -63,6 +75,6 @@ class RestaurantsRepository {
 
     suspend fun toggleFavoriteRestaurant(id: Int, value: Boolean) =
         withContext(Dispatchers.IO) {
-            restaurantsDao.update(PartialRestaurant(id = id, isFavorite = value))
+            restaurantsDao.update(PartialLocalRestaurant(id = id, isFavorite = value))
         }
 }

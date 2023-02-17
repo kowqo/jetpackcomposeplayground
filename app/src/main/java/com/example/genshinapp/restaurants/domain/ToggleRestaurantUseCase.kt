@@ -1,4 +1,6 @@
-package com.example.genshinapp.restaurant
+package com.example.genshinapp.restaurants.domain
+
+import com.example.genshinapp.restaurants.data.RestaurantsRepository
 
 class ToggleRestaurantUseCase {
     private val repository: RestaurantsRepository = RestaurantsRepository()
