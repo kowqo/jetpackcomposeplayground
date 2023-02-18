@@ -4,7 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -16,7 +16,9 @@ import com.example.genshinapp.restaurants.presentation.details.RestaurantViewMod
 import com.example.genshinapp.restaurants.presentation.list.RestaurantsScreen
 import com.example.genshinapp.restaurants.presentation.list.RestaurantsViewModel
 import com.example.genshinapp.ui.theme.GenshinappTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,7 +35,7 @@ private fun RestaurantApp() {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "restaurants") {
         composable(route = "restaurants") {
-            val viewModel: RestaurantsViewModel = viewModel()
+            val viewModel: RestaurantsViewModel = hiltViewModel()
             RestaurantsScreen(
                 onItemClick = { id ->
                     navController.navigate("restaurants/$id")

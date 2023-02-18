@@ -1,32 +1,22 @@
 package com.example.genshinapp.restaurants.data
 
-import com.example.genshinapp.RestaurantsApplication
 import com.example.genshinapp.restaurants.data.local.LocalRestaurant
 import com.example.genshinapp.restaurants.data.local.PartialLocalRestaurant
-import com.example.genshinapp.restaurants.data.local.RestaurantsDb
+import com.example.genshinapp.restaurants.data.local.RestaurantsDao
 import com.example.genshinapp.restaurants.data.remote.RestaurantsApiService
 import com.example.genshinapp.restaurants.domain.Restaurant
 import java.lang.Exception
 import java.net.ConnectException
 import java.net.UnknownHostException
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
-class RestaurantsRepository {
-    private val restInterface: RestaurantsApiService =
-        Retrofit.Builder()
-            .addConverterFactory(GsonConverterFactory.create())
-            .baseUrl(
-                "https://restaurantcompose-96296-default-rtdb.europe-west1.firebasedatabase.app/"
-            )
-            .build()
-            .create(RestaurantsApiService::class.java)
-    private val restaurantsDao = RestaurantsDb.getDaoInstance(
-        RestaurantsApplication.getAppContext()
-    )
+class RestaurantsRepository @Inject constructor(
+    private val restInterface: RestaurantsApiService,
+    private val restaurantsDao: RestaurantsDao
+) {
 
     suspend fun getRestaurants(): List<Restaurant> {
         return withContext(Dispatchers.IO) {

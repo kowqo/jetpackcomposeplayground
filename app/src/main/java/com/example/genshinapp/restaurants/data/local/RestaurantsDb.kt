@@ -13,6 +13,8 @@ import androidx.room.RoomDatabase
 abstract class RestaurantsDb : RoomDatabase() {
     abstract val dao: RestaurantsDao
 
+    // DI deprecate this
+
     companion object {
         @Volatile
         private var INSTANCE: RestaurantsDao? = null
